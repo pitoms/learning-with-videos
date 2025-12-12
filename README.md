@@ -13,7 +13,6 @@
   - Fullscreen support
   - Keyboard shortcuts
 - **Create Videos**: Upload new videos with title, description, and URL
-- **Edit Videos**: Update video title and description
 - **Comments**: View and add comments on videos
 - **Responsive Design**: Works on desktop and mobile devices
 
