@@ -1,6 +1,6 @@
-# AcademiaX - Learn Anything
+# OpenBook - Learn Anything
 
-A modern, full-featured educational video platform built with React, TypeScript, and TailwindCSS. This application allows users to browse, create, watch, and comment on educational videos.
+[Thought Process & Video Walkthrough](https://docs.google.com/document/d/1ptP6QN4EYK-4Dcat4RaD9enHZR1bzxX_r0KtBRl-vss/edit?tab=t.0)
 
 ## Features
 
@@ -62,30 +62,6 @@ src/
    ```
 4. Open http://localhost:5173 in your browser
 
-## API Integration
-
-The application integrates with the following API endpoints:
-
-| Method | Endpoint                         | Description                 |
-| ------ | -------------------------------- | --------------------------- |
-| GET    | `/videos?user_id={id}`           | Fetch all videos for a user |
-| GET    | `/videos/single?video_id={id}`   | Fetch a single video        |
-| POST   | `/videos`                        | Create a new video          |
-| PUT    | `/videos`                        | Update a video              |
-| GET    | `/videos/comments?video_id={id}` | Fetch comments for a video  |
-| POST   | `/videos/comments`               | Create a new comment        |
-
-## Keyboard Shortcuts
-
-| Key           | Action            |
-| ------------- | ----------------- |
-| `Space` / `K` | Play/Pause        |
-| `F`           | Toggle fullscreen |
-| `M`           | Toggle mute       |
-| `←`           | Seek backward 10s |
-| `→`           | Seek forward 10s  |
-| `↑`           | Volume up         |
-| `↓`           | Volume down       |
 
 ## Design Decisions
 
