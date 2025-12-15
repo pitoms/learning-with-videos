@@ -20,7 +20,7 @@ export function Header() {
             </div>
             <div className="flex flex-col">
               <span className="font-bold text-foreground text-lg leading-tight">
-                AcademiaX
+                OpenBook
               </span>
               <span className="text-xs text-muted-foreground">
                 Learn Through Video
