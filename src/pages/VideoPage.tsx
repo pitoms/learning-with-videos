@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { useVideo, useVideoNotes } from "../hooks";
@@ -41,8 +41,8 @@ export function VideoPage() {
   const expandedFromMiniPlayer =
     miniPlayerState.isActive && miniPlayerState.videoId === id;
   const shouldCloseMiniPlayerOnMount = useRef(expandedFromMiniPlayer);
-  // Capture mini player time before it gets cleared
-  const miniPlayerTimeRef = useRef(
+  // Capture mini player time before it gets cleared (useState to avoid ref access during render)
+  const [initialTime] = useState(() =>
     expandedFromMiniPlayer ? miniPlayerState.currentTime : undefined
   );
 
@@ -109,7 +109,7 @@ export function VideoPage() {
                 src={video.video_url}
                 title={video.title}
                 videoId={video.id}
-                initialTime={miniPlayerTimeRef.current}
+                initialTime={initialTime}
                 onTimeUpdate={handleTimeUpdate}
                 notes={notes}
               />

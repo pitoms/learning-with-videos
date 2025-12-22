@@ -63,11 +63,34 @@ export function PersistentVideoPlayer() {
   const isYouTube = videoSource?.type === "youtube";
   const isNative = videoSource?.type === "direct";
 
+  const stopTimeUpdateInterval = useCallback(() => {
+    if (timeUpdateInterval.current) {
+      clearInterval(timeUpdateInterval.current);
+      timeUpdateInterval.current = null;
+    }
+  }, []);
+
+  // eslint-disable-next-line react-hooks/preserve-manual-memoization
+  const startTimeUpdateInterval = useCallback(() => {
+    stopTimeUpdateInterval();
+    timeUpdateInterval.current = setInterval(() => {
+      if (ytPlayerRef.current) {
+        const time = ytPlayerRef.current.getCurrentTime();
+        const dur = ytPlayerRef.current.getDuration();
+        updatePlayback(time, true);
+        if (dur > 0) {
+          saveProgress(time, dur);
+        }
+      }
+    }, 250);
+  }, [updatePlayback, saveProgress, stopTimeUpdateInterval]);
+
   // Reset state when video changes
   useEffect(() => {
     if (state.videoId !== currentVideoIdRef.current) {
       currentVideoIdRef.current = state.videoId;
       initialSeekDone.current = false;
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setIsYTReady(false);
       setDuration(0);
       setDragPosition({ x: 0, y: 0 });
@@ -87,7 +110,9 @@ export function PersistentVideoPlayer() {
       if (ytPlayerRef.current) {
         try {
           ytPlayerRef.current.destroy();
-        } catch (e) {}
+        } catch {
+          // Player may already be destroyed
+        }
         ytPlayerRef.current = null;
       }
 
@@ -243,27 +268,6 @@ export function PersistentVideoPlayer() {
     getResumeTime,
   ]);
 
-  const startTimeUpdateInterval = useCallback(() => {
-    stopTimeUpdateInterval();
-    timeUpdateInterval.current = setInterval(() => {
-      if (ytPlayerRef.current) {
-        const time = ytPlayerRef.current.getCurrentTime();
-        const dur = ytPlayerRef.current.getDuration();
-        updatePlayback(time, true);
-        if (dur > 0) {
-          saveProgress(time, dur);
-        }
-      }
-    }, 250);
-  }, [updatePlayback, saveProgress]);
-
-  const stopTimeUpdateInterval = useCallback(() => {
-    if (timeUpdateInterval.current) {
-      clearInterval(timeUpdateInterval.current);
-      timeUpdateInterval.current = null;
-    }
-  }, []);
-
   // Player controls
   const togglePlay = useCallback(() => {
     setIsPlaying(!state.isPlaying);
@@ -281,7 +285,7 @@ export function PersistentVideoPlayer() {
       videoRef.current.muted = !isMuted;
     }
     setIsMuted(!isMuted);
-  }, [isYouTube, isNative, isMuted]);
+  }, [isYouTube, isNative, isMuted, videoRef, ytPlayerRef]);
 
   const handleVolumeChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -296,7 +300,7 @@ export function PersistentVideoPlayer() {
       setVolume(newVol);
       setIsMuted(newVol === 0);
     },
-    [isYouTube, isNative, isMuted]
+    [isYouTube, isNative, isMuted, videoRef, ytPlayerRef]
   );
 
   const handleSeek = useCallback(
@@ -310,7 +314,7 @@ export function PersistentVideoPlayer() {
       const newTime = pos * duration;
       seekTo(newTime);
     },
-    [duration, seekTo]
+    [duration, seekTo, progressRef]
   );
 
   const skip = useCallback(
@@ -335,7 +339,7 @@ export function PersistentVideoPlayer() {
       setPlaybackSpeed(speed);
       setShowSpeedMenu(false);
     },
-    [isYouTube, isNative]
+    [isYouTube, isNative, videoRef, ytPlayerRef]
   );
 
   const toggleFullscreen = useCallback(() => {

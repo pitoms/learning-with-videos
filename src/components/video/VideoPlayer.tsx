@@ -232,33 +232,6 @@ function YouTubePlayer({
     isBuffering: false,
   });
 
-  // Load YouTube IFrame API
-  useEffect(() => {
-    if (window.YT && window.YT.Player) {
-      initPlayer();
-      return;
-    }
-
-    const tag = document.createElement("script");
-    tag.src = "https://www.youtube.com/iframe_api";
-    const firstScriptTag = document.getElementsByTagName("script")[0];
-    firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
-
-    window.onYouTubeIframeAPIReady = () => {
-      initPlayer();
-    };
-
-    return () => {
-      if (playerRef.current) {
-        playerRef.current.destroy();
-      }
-      if (timeUpdateInterval.current) {
-        clearInterval(timeUpdateInterval.current);
-      }
-      ytPlayerRef.current = null;
-    };
-  }, [ytPlayerRef]);
-
   // Initialize YouTube player
   const initPlayer = useCallback(() => {
     if (!playerContainerRef.current || playerRef.current) return;
@@ -365,7 +338,34 @@ function YouTubePlayer({
         },
       },
     });
-  }, [youtubeVideoId, getResumeTime, saveProgress]);
+  }, [youtubeVideoId, getResumeTime, saveProgress, onTimeUpdate, ytPlayerRef]);
+
+  // Load YouTube IFrame API
+  useEffect(() => {
+    if (window.YT && window.YT.Player) {
+      initPlayer();
+      return;
+    }
+
+    const tag = document.createElement("script");
+    tag.src = "https://www.youtube.com/iframe_api";
+    const firstScriptTag = document.getElementsByTagName("script")[0];
+    firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
+
+    window.onYouTubeIframeAPIReady = () => {
+      initPlayer();
+    };
+
+    return () => {
+      if (playerRef.current) {
+        playerRef.current.destroy();
+      }
+      if (timeUpdateInterval.current) {
+        clearInterval(timeUpdateInterval.current);
+      }
+      ytPlayerRef.current = null;
+    };
+  }, [initPlayer, ytPlayerRef]);
 
   // Player controls
   const togglePlay = useCallback(() => {
@@ -1097,7 +1097,7 @@ function PlayerControlsOverlay({
     <>
       {/* Controls Overlay */}
       <div
-        className={`absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent pt-16 pb-4 px-4 transition-opacity duration-300 z-30 ${
+        className={`absolute inset-x-0 bottom-0 bg-linear-to-t from-black/80 via-black/40 to-transparent pt-16 pb-4 px-4 transition-opacity duration-300 z-30 ${
           state.showControls ? "opacity-100" : "opacity-0 pointer-events-none"
         }`}
       >
@@ -1361,7 +1361,7 @@ function PlayerControlsOverlay({
 
       {/* Video Title (shown on hover) */}
       <div
-        className={`absolute top-0 left-0 right-0 p-4 bg-gradient-to-b from-black/60 to-transparent transition-opacity duration-300 z-30 ${
+        className={`absolute top-0 left-0 right-0 p-4 bg-linear-to-b from-black/60 to-transparent transition-opacity duration-300 z-30 ${
           state.showControls ? "opacity-100" : "opacity-0 pointer-events-none"
         }`}
       >

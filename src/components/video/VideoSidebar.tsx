@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { BookOpen, Edit2, Plus, Trash2, Clock } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Textarea, Button } from "../ui";
@@ -72,7 +72,7 @@ export function VideoSidebar({
   const noteRefs = useRef<Map<string, HTMLDivElement | null>>(new Map());
   const notesContainerRef = useRef<HTMLDivElement>(null);
 
-  const getCurrentTime = (): number => {
+  const getCurrentTime = useCallback((): number => {
     if (ytPlayerRef.current) {
       return ytPlayerRef.current.getCurrentTime();
     }
@@ -80,7 +80,7 @@ export function VideoSidebar({
       return videoRef.current.currentTime;
     }
     return 0;
-  };
+  }, [ytPlayerRef, videoRef]);
 
   // Update displayed time at a consistent rate to prevent flickering
   useEffect(() => {
@@ -90,7 +90,7 @@ export function VideoSidebar({
       }
     }, 500);
     return () => clearInterval(interval);
-  }, [heldTimestamp]);
+  }, [heldTimestamp, getCurrentTime]);
 
   const handleSaveNote = () => {
     if (!noteInput.trim()) return;
@@ -115,11 +115,14 @@ export function VideoSidebar({
     setHeldTimestamp(null);
   };
 
-  // Reset state when video changes
-  useEffect(() => {
+  const prevVideoId = useRef(video.id);
+  // eslint-disable-next-line react-hooks/refs
+  if (prevVideoId.current !== video.id) {
+    // eslint-disable-next-line react-hooks/refs
+    prevVideoId.current = video.id;
     setActiveNoteId(null);
     setHeldTimestamp(null);
-  }, [video.id]);
+  }
 
   useEffect(() => {
     const updateActiveNote = () => {
@@ -145,7 +148,7 @@ export function VideoSidebar({
     };
     const interval = setInterval(updateActiveNote, 500);
     return () => clearInterval(interval);
-  }, [notes, activeNoteId, video.id]);
+  }, [notes, activeNoteId, video.id, getCurrentTime]);
 
   return (
     <div className="w-full lg:w-[360px] lg:border-l border-border bg-card lg:h-full lg:overflow-hidden flex flex-col">

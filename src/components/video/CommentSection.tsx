@@ -110,7 +110,7 @@ export function CommentSection({ videoId }: CommentSectionProps) {
   const createCommentMutation = useCreateComment();
   const shuffledColors = useMemo(() => {
     return comments.map((_, i) => getColorForComment(i + Math.floor(i / 3)));
-  }, [comments.length]);
+  }, [comments]);
   const currentUserId = useMemo(() => generateRandomUsername(), []);
 
   const handleSubmit = async (e: React.FormEvent) => {

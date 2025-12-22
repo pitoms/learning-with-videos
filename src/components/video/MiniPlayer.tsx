@@ -160,7 +160,7 @@ export function MiniPlayer() {
       if (ytPlayerRef.current) {
         try {
           ytPlayerRef.current.destroy();
-        } catch (e) {
+        } catch {
           // Player may already be destroyed
         }
         ytPlayerRef.current = null;
@@ -318,12 +318,16 @@ export function MiniPlayer() {
   }, [isDragging, dragOffset]);
 
   // Reset position when activated
-  useEffect(() => {
+  const prevIsActive = useRef(state.isActive);
+  // eslint-disable-next-line react-hooks/refs
+  if (prevIsActive.current !== state.isActive) {
+    // eslint-disable-next-line react-hooks/refs
+    prevIsActive.current = state.isActive;
     if (state.isActive) {
       setPosition({ x: 0, y: 0 });
       setIsYTReady(false);
     }
-  }, [state.isActive]);
+  }
 
   if (!state.isActive || !videoSource || videoSource.type === "invalid") {
     return null;

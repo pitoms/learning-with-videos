@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import type { VideoNote } from "../types";
 
 const STORAGE_KEY = "video_notes";
@@ -37,13 +37,20 @@ interface UseVideoNotesResult {
 export function useVideoNotes(
   videoId: string | undefined
 ): UseVideoNotesResult {
-  const [notes, setNotes] = useState<VideoNote[]>([]);
-
-  useEffect(() => {
-    if (!videoId) return;
+  const [notes, setNotes] = useState<VideoNote[]>(() => {
+    if (!videoId) return [];
     const stored = getStoredNotes();
-    setNotes(stored[videoId] || []);
-  }, [videoId]);
+    return stored[videoId] || [];
+  });
+
+  const prevVideoIdRef = useRef(videoId);
+  // eslint-disable-next-line react-hooks/refs
+  if (prevVideoIdRef.current !== videoId) {
+    // eslint-disable-next-line react-hooks/refs
+    prevVideoIdRef.current = videoId;
+    const stored = getStoredNotes();
+    setNotes(videoId ? stored[videoId] || [] : []);
+  }
 
   const addNote = useCallback(
     (content: string, timestamp: number): VideoNote => {

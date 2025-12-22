@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 
 const STORAGE_KEY = "video_progress";
 const COMPLETION_THRESHOLD = 0.9; // 90% watched = completed
@@ -30,14 +30,20 @@ function saveStoredProgress(progress: ProgressMap): void {
 }
 
 export function useVideoProgress(videoId: string | undefined) {
-  const [progress, setProgress] = useState<VideoProgress | null>(null);
-
-  // Load progress on mount
-  useEffect(() => {
-    if (!videoId) return;
+  const [progress, setProgress] = useState<VideoProgress | null>(() => {
+    if (!videoId) return null;
     const stored = getStoredProgress();
-    setProgress(stored[videoId] || null);
-  }, [videoId]);
+    return stored[videoId] || null;
+  });
+
+  const prevVideoIdRef = useRef(videoId);
+  // eslint-disable-next-line react-hooks/refs
+  if (prevVideoIdRef.current !== videoId) {
+    // eslint-disable-next-line react-hooks/refs
+    prevVideoIdRef.current = videoId;
+    const stored = getStoredProgress();
+    setProgress(videoId ? stored[videoId] || null : null);
+  }
 
   const saveProgress = useCallback(
     (currentTime: number, duration: number) => {
@@ -84,12 +90,10 @@ export function useVideoProgress(videoId: string | undefined) {
 
 // Hook to get progress for all videos (for VideoCard display)
 export function useAllVideoProgress() {
-  const [progressMap, setProgressMap] = useState<ProgressMap>({});
+  const [progressMap, setProgressMap] =
+    useState<ProgressMap>(getStoredProgress);
 
   useEffect(() => {
-    setProgressMap(getStoredProgress());
-
-    // Listen for storage changes from other tabs
     const handleStorage = (e: StorageEvent) => {
       if (e.key === STORAGE_KEY) {
         setProgressMap(getStoredProgress());
